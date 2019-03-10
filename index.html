@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Example</title>
+		<script src="jquery.min.js"></script>
+		<script src="jquery.nativecamera.min.js"></script>
+		<style>
+body {
+	font: 0.85em/1.2 'Arial', 'Helvetica', sans-serif;
+}
+		
+#myvideo {
+	display: block;
+}
+
+img {
+	width: 320px;
+	height: 240px;
+}
+
+p {
+	margin-bottom: 4px;
+}
+		</style>
+		<script>
+if (!window.console) { console = {log: function() {}} };
+
+$(document).ready(function(){
+	
+	$('#create').click( function(){
+		$('#myvideo').nativeCamera('create', { //create the nativeCamera object and set its options
+			width: 320, //width of the video object and captured image
+			height: 240, //height of the video object and captured image
+			sendData: false, //send the image data to server (for upload), true or false
+			sendURL: 'capture.php', //the URL that the upload handler script is at
+			create: function(){ console.log('callback: create'); },
+			start: function(){ console.log('callback: start'); },
+			stop: function(){ console.log('callback: stop'); },
+			destroy: function(){ console.log('callback: destroy'); },
+			capture: function(imgdata){
+				console.log('callback: capture'); 
+				$('#preview').attr('src', imgdata); //send captured image data to the preview <img> element
+			},
+			beforeSend: function(){ console.log('callback: sending'); /* captured image is about to be uploaded */ },
+			afterSend: function(){ console.log('callback: sent'); /* captured image was uploaded successfully */ },
+			unsupportedAPIError: function(){ 
+				console.log('callback: error, unsupported API'); //browser has no getUserMedia(), you can fallback to something else here like a Flash based camera
+				window.alert('Your browser does not have native camera support');
+			},
+			userPermissionError: function(){ console.log('callback: error, user permission'); /* user denied access to their camera */ },
+			deviceError: function(){ console.log('callback: error, device failure'); /* device problem */ },
+			captureError: function(){ console.log('callback: error, capture'); /* error when capturing image */ },
+			sendError: function(){ console.log('callback: error, send capture'); /* error when sending captured image */ },
+		});
+	});
+	
+	$('#start').click( function(){
+		$('#myvideo').nativeCamera('start'); //start the camera and update the stream
+	});
+	
+	$('#stop').click( function(){
+		$('#myvideo').nativeCamera('stop'); //stop the camera
+	});
+	
+	$('#destroy').click( function(){
+		$('#myvideo').nativeCamera('destroy'); //destroy the nativeCamera object
+	});
+	
+	$('#capture').click( function(){
+		$('#myvideo').nativeCamera('setOption', 'sendData', true); //change an option, e.g. turn on image upload
+		$('#myvideo').nativeCamera('capture'); //take a snapshot (and send it over to a server if option "sendData" is true)
+	});
+	
+});
+		</script>
+	</head>
+	<body>
+		<div id="myvideo"></div>
+		<input id="create" type="button" value="Create" />
+		<input id="start" type="button" value="Start" />
+		<input id="capture" type="button" value="Capture" />
+		<input id="stop" type="button" value="Stop" />
+		<input id="destroy" type="button" value="Destroy" />
+		<p>Preview</p>
+		<img id="preview" src="placeholder.jpg" alt="" />
+	</body>
+</html>
